@@ -4,12 +4,6 @@ import numpy as np
 import time
 import functions as f
 
-# mp_face_mesh = mp.solutions.face_mesh
-# face_mesh = mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5,  refine_landmarks=True)
-
-# mp_drawing = mp.solutions.drawing_utils
-
-# drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 
 # landmark indices
 LEFT_EYE =[ 362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385,384, 398 ]
@@ -22,11 +16,7 @@ RIGHT_IRIS = [469, 470, 471, 472]
 
 def eye_vector(results, image, mesh_points, head_vector, depth, scaling):
     img_h, img_w, img_c = image.shape
-    # print(results.multi_face_landmarks[0].landmark)
-    # mesh_points=np.array([np.multiply([p.x, p.y], [img_w, img_h]).astype(int) for p in results.multi_face_landmarks[0].landmark])
-    # print(mesh_points.shape)
-    # cv.polylines(frame, [mesh_points[LEFT_IRIS]], True, (0,255,0), 1, cv.LINE_AA)
-    # cv.polylines(frame, [mesh_points[RIGHT_IRIS]], True, (0,255,0), 1, cv.LINE_AA)
+    
     (l_cx, l_cy), l_radius = cv2.minEnclosingCircle(mesh_points[LEFT_IRIS])
     (r_cx, r_cy), r_radius = cv2.minEnclosingCircle(mesh_points[RIGHT_IRIS])
     center_left = np.array([l_cx, l_cy], dtype=np.int32)

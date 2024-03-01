@@ -63,29 +63,24 @@ def calculate_eyeAngle(head_angles, eye_angles, len, depth, scaling):    # eye_a
     if abs(eye_angles[0])<=0.0001 and abs(eye_angles[1])<=0.0001:
         return (0,0)
     else:
-        # project head angle to eye gazing angle
-        head_vec = np.array([head_angles[0], head_angles[1]])  # due to camera coordinate difference
-        head_len = math.sqrt(head_vec[0]**2 + head_vec[1]**2)
-        # head_z = head_angles[2] * 360
-        eye_vec = np.array([eye_angles[0], eye_angles[1]])
-        eye_len = math.sqrt(eye_vec[0]**2 + eye_vec[1]**2)
-        # eye_z = eye_angles[2]
-        alpha1 = math.atan2(head_vec[1], head_vec[0])  # atan2 returns radian
-        alpha2 = math.atan2(eye_vec[1], eye_vec[0])
-        # alpha1 = math.atan(head_vec[1]/head_vec[0])  # atan2 returns radian
-        # alpha2 = math.atan(eye_vec[1]/eye_vec[0])
-        new_headLen = head_len*abs(math.cos(alpha1+alpha2))
-        new_headVec = np.array([math.cos(alpha2)*new_headLen, math.sin(alpha2)*new_headLen])
+        # project eye angle to head angle
+        head_vec = np.array([head_angles[0], head_angles[1]])*scaling['head']  # due to camera coordinate difference
+        head_len = math.sqrt(head_vec[0]**2 + head_vec[1]**2)*scaling['head']
+        eye_vec = np.array([eye_angles[0], eye_angles[1]])*scaling['eye']
+        eye_len = math.sqrt(eye_vec[0]**2 + eye_vec[1]**2)*scaling['eye']
 
+        eye_project = (head_vec[0]*eye_vec[0]+head_vec[1]*eye_vec[1])/head_len
+        eye_normal = eye_vec-eye_project
 
         # calculate tan(head_project+eye)
-        tan_newhead = new_headLen*scaling['head']/depth
-        cos_newhead = 1/math.sqrt(1+tan_newhead**2)    # just consider positive because length still be positive
-        tan_eye = convert_to_mm(len, depth)/(cos_newhead*eye_radius_mm)
-        tan_neweye = (tan_newhead+tan_eye)/(1-(tan_newhead*tan_eye)) - tan_newhead   # calculated seperately because head and eye have different scaling
-                                                                                     
-        return (tan_eye*math.cos(alpha2), tan_eye*math.sin(alpha2))   # use to use tan_neweye
-
+        tan_head = head_len/depth
+        cos_head = 1/math.sqrt(1+tan_head**2)    # just consider positive because length still be positive
+        tan_eye = convert_to_mm(len, depth)/(cos_head*eye_radius_mm)
+        tan_neweye = (tan_head+tan_eye)/(1-(tan_head*tan_eye))   # calculated seperately because head and eye have different scaling
+        vector = depth*tan_neweye*head_vec/head_len+eye_normal
+                                                                              
+        return vector   # use to use tan_neweye
+        
         # direction for improvement: try to reduce to calculation of tan and cos to reduce dot jumping
 
 # add abs at line 77
